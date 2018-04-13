@@ -191,7 +191,9 @@ if __name__ == '__main__':
     print_cost = True
     costs = []
 
-    with tf.Session() as sess:
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    with tf.Session(config=config) as sess:
 
             # Run the initialization
             sess.run(init)
