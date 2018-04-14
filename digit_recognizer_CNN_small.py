@@ -19,76 +19,60 @@ import math
 def forward_propagation(X):
     """
     Implements the forward propagation for the model:
-    (CONV2D -> RELU)*2 -> MAXPOOL -> Dropout -> (CONV2D -> RELU)*2 -> MAXPOOL -> Dropout -> FLATTEN -> FULLYCONNECTED
+    (CONV2D -> RELU)*3 -> FLATTEN -> (FULLYCONNECTED)*2
     
     Arguments:
     X -- input dataset placeholder, of shape (input size, number of examples)
     
     Returns:
-    Z3 -- the output of the last LINEAR unit
+    Z5 -- the output of the last LINEAR unit
     """
     
     # Weights initialization 
-    W1 = tf.get_variable("W1", [5, 5, 1, 32], initializer=tf.contrib.layers.xavier_initializer(seed=0))
-    W2 = tf.get_variable("W2", [5, 5, 32, 32], initializer=tf.contrib.layers.xavier_initializer(seed=0))
-    W3 = tf.get_variable("W3", [3, 3, 32, 64], initializer=tf.contrib.layers.xavier_initializer(seed=0))
-    W4 = tf.get_variable("W4", [3, 3, 64, 64], initializer=tf.contrib.layers.xavier_initializer(seed=0))
+    W1 = tf.get_variable("W1", [5, 5, 1, 4], initializer=tf.contrib.layers.xavier_initializer(seed=0))
+    b1 = tf.get_variable("b1", shape=[4], initializer=tf.constant_initializer(0.0))
+
+    W2 = tf.get_variable("W2", [5, 5, 4, 8], initializer=tf.contrib.layers.xavier_initializer(seed=0))
+    b2 = tf.get_variable("b2", shape=[8], initializer=tf.constant_initializer(0.0))
+
+    W3 = tf.get_variable("W3", [4, 4, 8, 12], initializer=tf.contrib.layers.xavier_initializer(seed=0))
+    b3 = tf.get_variable("b3", shape=[12], initializer=tf.constant_initializer(0.0))
+
     
     # CONV2D: stride of 1, padding 'SAME'
-    Z1 = tf.nn.conv2d(X, W1, strides=[1, 1, 1, 1], padding='SAME')
+    A1 = tf.nn.conv2d(X, W1, strides=[1, 1, 1, 1], padding='SAME') + b1
     # RELU
-    A1 = tf.nn.relu(Z1)
+    Z1 = tf.nn.relu(A1)
     
     # CONV2D: stride of 1, padding 'SAME'
-    Z2 = tf.nn.conv2d(A1, W2, strides=[1, 1, 1, 1], padding='SAME')
+    A2 = tf.nn.conv2d(Z1, W2, strides=[1, 2, 2, 1], padding='SAME') + b2
     # RELU
-    A2 = tf.nn.relu(Z2)
-    
-    # MAXPOOL: window 8x8, stride 8, padding 'SAME'
-    P1 = tf.nn.max_pool(A2, ksize = [1, 2, 2, 1], strides = [1, 2, 2, 1], padding='SAME')
-    
-    # Dropout layer
-    D1 = tf.nn.dropout(P1, keep_prob=0.75)
-    
-    
+    Z2 = tf.nn.relu(A2)
+
     # CONV2D: stride of 1, padding 'SAME'
-    Z3 = tf.nn.conv2d(D1, W3, strides=[1, 1, 1, 1], padding='SAME')
+    A3 = tf.nn.conv2d(Z2, W3, strides=[1, 2, 2, 1], padding='SAME') + b3
     # RELU
-    A3 = tf.nn.relu(Z3)
-    
-    # CONV2D: stride of 1, padding 'SAME'
-    Z4 = tf.nn.conv2d(A3, W4, strides=[1, 1, 1, 1], padding='SAME')
-    # RELU
-    A4 = tf.nn.relu(Z4)
-    
-    # MAXPOOL: window 8x8, stride 8, padding 'SAME'
-    P2 = tf.nn.max_pool(A4, ksize = [1, 2, 2, 1], strides = [1, 2, 2, 1], padding='SAME')
-    
-    # Dropout layer
-    D2 = tf.nn.dropout(P2, keep_prob=0.75)
+    Z3 = tf.nn.relu(A3)
     
     
     # FLATTEN
-    P = tf.contrib.layers.flatten(D2)
-    
-    # Dropout layer
-    D3 = tf.nn.dropout(P, keep_prob=0.5)
+    P = tf.contrib.layers.flatten(Z3)
+
+    # FULLY-CONNECTED with relu activation function.
+    # 200 neurons in output layer.
+    Z4 = tf.contrib.layers.fully_connected(P, 200)
     
     # FULLY-CONNECTED without non-linear activation function.
     # 10 neurons in output layer.  
-    Z5 = tf.contrib.layers.fully_connected(D3, 10, activation_fn=None)
+    Z5 = tf.contrib.layers.fully_connected(Z4, 10, activation_fn=None)
    
 
 
     print(X.shape)
     print(Z1.shape)
     print(Z2.shape)
-    print(P1.shape)
-    
     print(Z3.shape)
     print(Z4.shape)
-    print(P2.shape)
-    print(P.shape)
     print(Z5.shape)
 
     return Z5
