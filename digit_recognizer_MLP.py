@@ -17,23 +17,52 @@ import math
 
 def forward_propagation(X):
     """
-    Implements the forward propagation for Single layer Neural Network.
+    Implements the forward propagation for 5 layer Neural Network.
 
     Arguments:
     X -- input dataset placeholder, of shape (input size, number of examples)
 
     Returns:
-    A -- the output of the last LINEAR unit
+    A5 -- the output of the last LINEAR unit
     """
 
     # Weight and Bias initialization
-    W = tf.get_variable("W", [784, 10], initializer=tf.contrib.layers.xavier_initializer(seed=0))
-    b = tf.get_variable("b", shape=[10], initializer=tf.constant_initializer(0.0))
+    W1 = tf.get_variable("W1", [784, 200], initializer=tf.contrib.layers.xavier_initializer(seed=0))
+    b1 = tf.get_variable("b1", shape=[200], initializer=tf.constant_initializer(0.0))
 
-    A = tf.matmul(X, W) + b
-    print(A.shape)
+    W2 = tf.get_variable("W2", [200, 100], initializer=tf.contrib.layers.xavier_initializer(seed=0))
+    b2 = tf.get_variable("b2", shape=[100], initializer=tf.constant_initializer(0.0))
 
-    return A
+    W3 = tf.get_variable("W3", [100, 60], initializer=tf.contrib.layers.xavier_initializer(seed=0))
+    b3 = tf.get_variable("b3", shape=[60], initializer=tf.constant_initializer(0.0))
+
+    W4 = tf.get_variable("W4", [60, 30], initializer=tf.contrib.layers.xavier_initializer(seed=0))
+    b4 = tf.get_variable("b4", shape=[30], initializer=tf.constant_initializer(0.0))
+
+    W5 = tf.get_variable("W5", [30, 10], initializer=tf.contrib.layers.xavier_initializer(seed=0))
+    b5 = tf.get_variable("b5", shape=[10], initializer=tf.constant_initializer(0.0))
+
+    A1 = tf.matmul(X, W1) + b1
+    Z1 = tf.nn.relu(A1)
+    print("Layer 1: ", Z1.shape)
+
+    A2 = tf.matmul(Z1, W2) + b2
+    Z2 = tf.nn.relu(A2)
+    print("Layer 2: ", Z2.shape)
+
+    A3 = tf.matmul(Z2, W3) + b3
+    Z3 = tf.nn.relu(A3)
+    print("Layer 3: ", Z3.shape)
+
+    A4 = tf.matmul(Z3, W4) + b4
+    Z4 = tf.nn.relu(A4)
+    print("Layer 4: ", Z4.shape)
+
+    A5 = tf.matmul(Z4, W5) + b5
+
+    print("Layer 5: ", A5.shape)
+
+    return A5
 
 
 def random_mini_batches(X, Y, mini_batch_size=64, seed=0):
