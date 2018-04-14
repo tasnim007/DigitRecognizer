@@ -190,7 +190,9 @@ if __name__ == '__main__':
 
                     # Run the session to execute the optimizer and the cost, the feedict should contain a minibatch for (X,Y).
                     ### START CODE HERE ### (1 line)
-                    _ , temp_cost = sess.run([optimizer, cost], feed_dict={X:minibatch_X, Y:minibatch_Y})
+                    _ , temp_cost = sess.run([optimizer, cost], feed_dict={X:minibatch_X,
+                                                                           Y:minibatch_Y,
+                                                                           keep_prob: 0.75})
                     ### END CODE HERE ###
 
                     minibatch_cost += temp_cost / num_minibatches
@@ -198,8 +200,8 @@ if __name__ == '__main__':
 
                 print("\nEpoch: ", epoch)
                 print("Cost: ", minibatch_cost)
-                train_accuracy = accuracy.eval({X: X_train, Y: Y_train})
-                dev_accuracy = accuracy.eval({X: X_val, Y: Y_val})
+                train_accuracy = accuracy.eval({X: X_train, Y: Y_train, keep_prob: 1.0})
+                dev_accuracy = accuracy.eval({X: X_val, Y: Y_val, keep_prob: 1.0})
                 print("Train Accuracy: ", train_accuracy)
                 print("Dev Accuracy: ", dev_accuracy)
 
