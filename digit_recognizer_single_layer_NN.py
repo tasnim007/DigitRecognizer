@@ -169,17 +169,10 @@ if __name__ == '__main__':
                 print("Train Accuracy: ", train_accuracy)
                 print("Dev Accuracy: ", dev_accuracy)
 
-            '''
-            # plot the cost
-            plt.plot(np.squeeze(costs))
-            plt.ylabel('cost')
-            plt.xlabel('iterations (per tens)')
-            plt.title("Learning rate =" + str(learning_rate))
-            plt.show()
-            '''
-
-
-
-
-
-
+            predicted_labels = predict_op.eval({X: test})
+            np.savetxt('result_slnn.csv',
+                       np.c_[range(1, len(test)+1), predicted_labels],
+                       delimiter=',',
+                       header='ImageId,Label',
+                       comments='',
+                       fmt='%d')
