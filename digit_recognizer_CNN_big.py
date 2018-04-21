@@ -10,18 +10,21 @@ def forward_propagation(X):
     """
     Implements the forward propagation for the model:
     """
-    # Weights initialization 
-    W1 = tf.get_variable("W1", [5, 5, 1, 4],
+    W1 = tf.get_variable("W1", [6, 6, 1, 32],
                          initializer=tf.contrib.layers.xavier_initializer(seed=0))
-    b1 = tf.get_variable("b1", shape=[4],
+    b1 = tf.get_variable("b1", shape=[32],
                          initializer=tf.constant_initializer(0.0))
-    W2 = tf.get_variable("W2", [5, 5, 4, 8],
+    W2 = tf.get_variable("W2", [5, 5, 32, 32],
                          initializer=tf.contrib.layers.xavier_initializer(seed=0))
-    b2 = tf.get_variable("b2", shape=[8],
+    b2 = tf.get_variable("b2", shape=[32],
                          initializer=tf.constant_initializer(0.0))
-    W3 = tf.get_variable("W3", [4, 4, 8, 12],
+    W3 = tf.get_variable("W3", [4, 4, 32, 64],
                          initializer=tf.contrib.layers.xavier_initializer(seed=0))
-    b3 = tf.get_variable("b3", shape=[12],
+    b3 = tf.get_variable("b3", shape=[64],
+                         initializer=tf.constant_initializer(0.0))
+    W4 = tf.get_variable("W4", [3, 3, 64, 64],
+                         initializer=tf.contrib.layers.xavier_initializer(seed=0))
+    b4 = tf.get_variable("b4", shape=[64],
                          initializer=tf.constant_initializer(0.0))
     # CONV2D: stride of 1, padding 'SAME'
     A1 = tf.nn.conv2d(X, W1, strides=[1, 1, 1, 1], padding='SAME') + b1
@@ -30,26 +33,38 @@ def forward_propagation(X):
     # CONV2D: stride of 1, padding 'SAME'
     A2 = tf.nn.conv2d(Z1, W2, strides=[1, 1, 1, 1], padding='SAME') + b2
     # RELU
-    Z2 = tf.nn.relu(A2)
+    Z2 = tf.nn.relu(A2)   
+    # MAXPOOL: window 2x2, stride 2, padding 'SAME'
+    P1 = tf.nn.max_pool(Z2, ksize = [1, 2, 2, 1], strides = [1, 2, 2, 1], padding='SAME')
     # CONV2D: stride of 1, padding 'SAME'
-    A3 = tf.nn.conv2d(Z2, W3, strides=[1, 1, 1, 1], padding='SAME') + b3
+    A3 = tf.nn.conv2d(P1, W3, strides=[1, 1, 1, 1], padding='SAME') + b3
     # RELU
-    Z3 = tf.nn.relu(A3) 
+    Z3 = tf.nn.relu(A3)
+    # CONV2D: stride of 1, padding 'SAME'
+    A4 = tf.nn.conv2d(Z3, W4, strides=[1, 1, 1, 1], padding='SAME') + b4
+    # RELU
+    Z4 = tf.nn.relu(A4)
+    # MAXPOOL: window 2x2, stride 2, padding 'SAME'
+    P2 = tf.nn.max_pool(Z4, ksize = [1, 2, 2, 1], strides = [1, 2, 2, 1], padding='SAME')
     # FLATTEN
-    P = tf.contrib.layers.flatten(Z3)
+    P = tf.contrib.layers.flatten(P2)
     # FULLY-CONNECTED with relu activation function.
     # 200 neurons in output layer.
-    Z4 = tf.contrib.layers.fully_connected(P, 200)
+    Z5 = tf.contrib.layers.fully_connected(P, 200)
     # FULLY-CONNECTED without non-linear activation function.
     # 10 neurons in output layer.  
-    Z5 = tf.contrib.layers.fully_connected(Z4, 10, activation_fn=None)
+    Z6 = tf.contrib.layers.fully_connected(Z5, 10, activation_fn=None)
     print(X.shape)
     print(Z1.shape)
     print(Z2.shape)
+    print(P1.shape)
     print(Z3.shape)
     print(Z4.shape)
+    print(P2.shape)
+    print(P.shape)
     print(Z5.shape)
-    return Z5
+    print(Z6.shape)
+    return Z6
 
 def random_mini_batches(X, Y, mini_batch_size = 64, seed = 0):
     """
@@ -136,7 +151,7 @@ if __name__ == '__main__':
                 print("Train Accuracy: ", train_accuracy)
                 print("Dev Accuracy: ", dev_accuracy)
             predicted_labels = predict_op.eval({X: test})
-            np.savetxt('result_CNN_small.csv',
+            np.savetxt('result_CNN_big.csv',
                        np.c_[range(1, len(test)+1), predicted_labels],
                        delimiter=',',
                        header='ImageId,Label',
